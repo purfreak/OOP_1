@@ -42,4 +42,7 @@ int main() {
     std::cin >> k;
     
     std::cout << solve (n, a, m, b, k);
+    
+    delete[] a;
+    delete[] b;
 }

@@ -1,129 +1,131 @@
-/*Дано число N ≤ 104 и последовательность целых чисел из [-231..231] длиной N.
-Требуется построить бинарное дерево, заданное наивным порядком вставки.
-Т.е., при добавлении очередного числа K в дерево с корнем root,
-если root→Key ≤ K, то узел K добавляется в правое поддерево root; иначе в левое поддерево root.
-Выведите элементы в порядке post-order (снизу вверх).*/
 #include <iostream>
 #include <vector>
+#include <stack>
 
 
-template <typename T>
 class binaryTree {
 private:
-	struct binaryTreeNode {
-		T data;
-		binaryTreeNode* left;
-		binaryTreeNode* right;
-		binaryTreeNode();
-		binaryTreeNode(T& value);
-		~binaryTreeNode();
-	};
-	binaryTreeNode* root;
+    struct binaryTreeNode {
+        int data;
+        binaryTreeNode* left;
+        binaryTreeNode* right;
+        binaryTreeNode();
+        explicit binaryTreeNode(int& value);
+        ~binaryTreeNode();
+    };
+    binaryTreeNode* root;
 
-	void add(T& value, binaryTreeNode*& current);
-	void copyTree(std::vector<T>& destination, binaryTreeNode* current);
+    void add(int& value, binaryTreeNode*& current);
+    void copyTree(std::vector<int> &destination, std::stack<binaryTreeNode*> &s);
 
 public:
-	binaryTree();
-	~binaryTree();
+    binaryTree();
+    ~binaryTree();
 
-	void add(T& value);
-	void copyTree(std::vector<T>& destination);
+    void add(int& value);
+    void copyTree(std::vector<int>& destination);
 };
 
 
-template <typename T>
-binaryTree<T>::binaryTreeNode::binaryTreeNode() {
-	data = T();
-	left = nullptr;
-	right = nullptr;
+binaryTree::binaryTreeNode::binaryTreeNode() {
+    data = int();
+    left = nullptr;
+    right = nullptr;
 }
 
 
-template <typename T>
-binaryTree<T>::binaryTreeNode::binaryTreeNode(T& value) {
-	data = value;
-	left = nullptr;
-	right = nullptr;
+binaryTree::binaryTreeNode::binaryTreeNode(int& value) {
+    data = value;
+    left = nullptr;
+    right = nullptr;
 }
 
 
-template <typename T>
-binaryTree<T>::binaryTreeNode::~binaryTreeNode() {
-	delete left;
-	delete right;
+binaryTree::binaryTreeNode::~binaryTreeNode() {
+    delete left;
+    delete right;
 }
 
 
-template <typename T>
-binaryTree<T>::binaryTree() {
-	root = nullptr;
+binaryTree::binaryTree() {
+    root = nullptr;
 }
 
 
-template <typename T>
-binaryTree<T>::~binaryTree() {
-	delete root;
+binaryTree::~binaryTree() {
+    delete root;
 }
 
 
-template <typename T>
-void binaryTree<T>::add(T& value) {
-	add(value, root);
+void binaryTree::add(int& value) {
+    add(value, root);
 }
 
 
-template <typename T>
-void binaryTree<T>::add(T& value, binaryTreeNode*& current) {
-	if(current) {
-		if(current->data <= value) {
-			add(value, current->right);
-		} else {
-			add(value, current->left);
-		}
-	} else {
-		current = new binaryTreeNode(value);
-	} 
+void binaryTree::add(int& value, binaryTreeNode*& current) {
+    if (current) {
+        if (current->data <= value) {
+            add(value, current->right);
+        } else {
+            add(value, current->left);
+        }
+    } else {
+        current = new binaryTreeNode(value);
+    }
 
 }
 
 
-template <typename T>
-void binaryTree<T>::copyTree(std::vector<T>& destination) {
-	copyTree(destination, root);
+void binaryTree::copyTree(std::vector<int>& destination) {
+    if (!root)
+        return;
+    
+    std::stack<binaryTreeNode*> s1;
+    std::stack<binaryTreeNode*> s2;
+    
+    s1.push(root);
+    binaryTreeNode* node;
+
+    // Run while first stack is not empty 
+    while (!s1.empty()) {
+        // Pop an item from s1 and push it to s2 
+        node = s1.top();
+        s1.pop();
+        s2.push(node);
+
+        // Push left and right children of removed item to s1 
+        if (node->left)
+            s1.push(node->left);
+        if (node->right)
+            s1.push(node->right);
+    }
+
+    // Print all elements of second stack 
+    while (!s2.empty()) {
+        destination.push_back(s2.top() -> data);
+        s2.pop();
+    }
 }
 
-
-template <typename T>
-void binaryTree<T>::copyTree(std::vector<T>& destination, binaryTreeNode* current) {
-	if(current->left) {
-		copyTree(destination, current->left);
-	}
-	if(current->right) {
-		copyTree(destination, current->right);
-	}
-	destination.push_back(current->data);
-}
 
 
 int main() {
-	int n;
-	std::cin >> n;
+    int n;
+    std::cin >> n;
 
-	binaryTree<int> Tree;
-	for(int i = 0; i < n; i++) {
-		int temp;
-		std::cin >> temp;
-		Tree.add(temp);
-	}
+    binaryTree Tree;
 
-	std::vector<int> out;
-	Tree.copyTree(out);
+    int temp;
+    for (int i = 0; i < n; i++) {
+        std::cin >> temp;
+        Tree.add(temp);
+    }
 
-	for(int i = 0; i < n; i++) {
-		std:: cout << out[i] << " ";
-	}
-	std::cout << std::endl;
+    std::vector<int> out;
+    Tree.copyTree(out);
 
-	return 0;
+    for (int i = 0; i < n; i++) {
+        std:: cout << out[i] << " ";
+    }
+    std::cout << std::endl;
 }
